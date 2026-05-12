@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Club Emprendimiento CFU</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #0f2347;
+    --navy2: #1a3c6e;
+    --gold: #e8a020;
+    --gold2: #f5c842;
+    --bg: #f7f6f2;
+    --white: #ffffff;
+    --text: #1a1a2e;
+    --muted: #6b6b7b;
+    --border: rgba(0,0,0,0.08);
+    --radius: 14px;
+    --shadow: 0 2px 16px rgba(15,35,71,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ─── LOGIN ─── */
+  #loginPage { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+  .login-card {
+    background: var(--white); border-radius: 24px; padding: 3rem 2.5rem;
+    max-width: 400px; width: 100%; text-align: center;
+    box-shadow: 0 8px 40px rgba(15,35,71,0.12);
+  }
+  .login-badge { display: inline-flex; align-items: center; justify-content: center;
+    width: 72px; height: 72px; border-radius: 20px; background: var(--navy);
+    margin-bottom: 1.5rem; }
+  .login-badge span { font-family: 'DM Serif Display', serif; color: var(--gold); font-size: 26px; }
+  .login-card h1 { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 0.4rem; }
+  .login-card p { color: var(--muted); font-size: 14px; margin-bottom: 2rem; line-height: 1.6; }
+  .btn-google {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 13px 20px; border-radius: 12px;
+    border: 1.5px solid var(--border); background: var(--white);
+    font-size: 14px; font-weight: 500; color: var(--text); cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .btn-google:hover { background: var(--bg); box-shadow: var(--shadow); }
+  .login-note { font-size: 12px; color: var(--muted); margin-top: 1.2rem; }
+
+  /* ─── APP SHELL ─── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+
+  /* NAV */
+  nav {
+    background: var(--navy); padding: 0 1.5rem; height: 60px;
+    display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; }
+  .nav-logo { font-family: 'DM Serif Display', serif; color: var(--gold); font-size: 18px; }
+  .nav-sub { font-size: 12px; color: rgba(255,255,255,0.5); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .nav-name { font-size: 13px; color: rgba(255,255,255,0.8); }
+  .nav-avatar {
+    width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--gold);
+    object-fit: cover; cursor: pointer;
+  }
+  .nav-avatar-txt {
+    width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--gold);
+    background: var(--navy2); display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: var(--gold);
+  }
+  .btn-logout { font-size: 12px; color: rgba(255,255,255,0.5); background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+  .btn-logout:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+  /* PENDING BANNER */
+  #pendingBanner {
+    background: #fffbea; border-bottom: 1px solid #f5c842;
+    padding: 0.75rem 1.5rem; text-align: center; font-size: 13px; color: #7a5c00;
+    display: none;
+  }
+
+  /* TABS */
+  .tabs { background: var(--white); border-bottom: 1px solid var(--border); display: flex; padding: 0 1.5rem; overflow-x: auto; }
+  .tab {
+    padding: 0 1rem; height: 48px; display: flex; align-items: center; gap: 6px;
+    font-size: 14px; color: var(--muted); border-bottom: 2.5px solid transparent;
+    cursor: pointer; white-space: nowrap; transition: color 0.15s;
+  }
+  .tab.active { color: var(--navy2); border-bottom-color: var(--navy2); font-weight: 500; }
+  .tab:hover:not(.active) { color: var(--text); }
+  .tab svg { width: 16px; height: 16px; }
+
+  /* MAIN CONTENT */
+  main { flex: 1; padding: 1.5rem; max-width: 900px; margin: 0 auto; width: 100%; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--white); border-radius: var(--radius); padding: 1.1rem 1.25rem; border: 1px solid var(--border); }
+  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 600; color: var(--navy); }
+  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* BADGES */
+  .section-header { font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 12px; margin-top: 1.5rem; }
+  .badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .badge-card {
+    background: var(--white); border-radius: var(--radius); padding: 1.1rem;
+    border: 1.5px solid var(--border); text-align: center; transition: border-color 0.15s, transform 0.15s;
+  }
+  .badge-card.earned { border-color: var(--gold); }
+  .badge-card.earned:hover { transform: translateY(-2px); }
+  .badge-card.locked { opacity: 0.45; }
+  .badge-emoji { font-size: 32px; margin-bottom: 8px; }
+  .badge-name { font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+  .badge-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .badge-pill { display: inline-block; margin-top: 7px; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 600; }
+  .pill-earned { background: #fef3d0; color: #7a5c00; }
+  .pill-locked { background: #f0f0f0; color: #999; }
+
+  /* EVENTS */
+  .events-list { display: flex; flex-direction: column; gap: 10px; }
+  .event-card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem; }
+  .event-date { min-width: 52px; text-align: center; background: var(--bg); border-radius: 10px; padding: 8px; }
+  .event-day { font-size: 22px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .event-month { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; }
+  .event-info { flex: 1; }
+  .event-title { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+  .event-meta { font-size: 12px; color: var(--muted); }
+  .event-pts { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: #fef3d0; color: #7a5c00; font-weight: 600; white-space: nowrap; }
+
+  /* RANKING */
+  .rank-list { display: flex; flex-direction: column; gap: 8px; }
+  .rank-row { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 0.85rem 1rem; display: flex; align-items: center; gap: 12px; }
+  .rank-row.me { border-color: var(--navy2); background: #f0f5ff; }
+  .rank-pos { font-size: 14px; font-weight: 700; color: var(--muted); min-width: 24px; text-align: center; }
+  .rank-pos.top { color: var(--gold); }
+  .rank-av { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .rank-name { flex: 1; font-size: 14px; color: var(--navy); }
+  .rank-you { font-size: 11px; color: var(--navy2); font-weight: 600; }
+  .rank-pts { font-size: 14px; font-weight: 700; color: var(--navy2); }
+  .rank-bdg { font-size: 12px; color: var(--muted); }
+
+  /* ADMIN */
+  .admin-section { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 1rem; }
+  .admin-title { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  @media(max-width:500px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+  .form-input, .form-select {
+    border: 1.5px solid var(--border); border-radius: 10px; padding: 9px 12px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text);
+    background: var(--bg); outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--navy2); background: var(--white); }
+  .btn-primary {
+    background: var(--navy); color: var(--white); border: none; border-radius: 10px;
+    padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: background 0.15s;
+  }
+  .btn-primary:hover { background: var(--navy2); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+  .btn-success { background: #1a7a4a; }
+  .btn-success:hover { background: #155f39; }
+  .btn-danger { background: #c0392b; }
+  .btn-danger:hover { background: #962d22; }
+
+  /* PENDING USERS TABLE */
+  .user-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .user-row:last-child { border-bottom: none; }
+  .user-av { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+  .user-av-txt { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #e8f0fe; color: var(--navy2); flex-shrink: 0; }
+  .user-info { flex: 1; }
+  .user-name { font-size: 14px; font-weight: 500; color: var(--navy); }
+  .user-email { font-size: 12px; color: var(--muted); }
+  .user-actions { display: flex; gap: 6px; }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--navy); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 9999; }
+  #toast.show { opacity: 1; }
+
+  /* LOADING */
+  #loadingScreen { position: fixed; inset: 0; background: var(--navy); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; z-index: 9999; transition: opacity 0.4s; }
+  #loadingScreen.hide { opacity: 0; pointer-events: none; }
+  .load-logo { font-family: 'DM Serif Display', serif; color: var(--gold); font-size: 48px; }
+  .load-sub { font-size: 14px; color: rgba(255,255,255,0.5); }
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingScreen">
+  <div class="load-logo">CE</div>
+  <div class="load-sub">Club Emprendimiento CFU</div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginPage" style="display:none">
+  <div class="login-card">
+    <div class="login-badge"><span>CE</span></div>
+    <h1>Club Emprendimiento</h1>
+    <p>Ingresa con tu cuenta Google para acumular insignias y seguir los eventos del club.</p>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Ingresar con Google
+    </button>
+    <div class="login-note">Solo miembros aprobados del club tienen acceso completo</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="pendingBanner">⏳ Tu cuenta está pendiente de aprobación. Un administrador te dará acceso pronto.</div>
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-logo">CE CFU</div>
+      <div class="nav-sub">Club Emprendimiento</div>
+    </div>
+    <div class="nav-right">
+      <span class="nav-name" id="navName"></span>
+      <div id="navAvatar" class="nav-avatar-txt"></div>
+      <button class="btn-logout" onclick="signOut()">Salir</button>
+    </div>
+  </nav>
+
+  <div class="tabs" id="tabsBar">
+    <div class="tab active" onclick="switchTab('perfil',this)" data-tab="perfil">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> Mi perfil
+    </div>
+    <div class="tab" onclick="switchTab('eventos',this)" data-tab="eventos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Eventos
+    </div>
+    <div class="tab" onclick="switchTab('ranking',this)" data-tab="ranking">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6L3 12h4v6h2v-6h4L8 6z" transform="rotate(180 8 12)"/><rect x="9" y="4" width="6" height="16" rx="1"/><path d="M16 6l5 6h-4v6h-2v-6H11l5-6z"/></svg> Ranking
+    </div>
+    <div class="tab" id="adminTab" onclick="switchTab('admin',this)" data-tab="admin" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Admin
+    </div>
+  </div>
+
+  <main>
+    <!-- PERFIL -->
+    <div class="panel active" id="panel-perfil">
+      <div class="stats-grid" id="statsGrid"></div>
+      <div class="section-header">Insignias obtenidas</div>
+      <div class="badges-grid" id="earnedBadges"></div>
+      <div class="section-header" style="margin-top:1.5rem">Insignias por desbloquear</div>
+      <div class="badges-grid" id="lockedBadges"></div>
+    </div>
+
+    <!-- EVENTOS -->
+    <div class="panel" id="panel-eventos">
+      <div class="events-list" id="eventsList"></div>
+    </div>
+
+    <!-- RANKING -->
+    <div class="panel" id="panel-ranking">
+      <div class="rank-list" id="rankList"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="panel" id="panel-admin">
+      <!-- Aprobar usuarios -->
+      <div class="admin-section">
+        <div class="admin-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Usuarios pendientes de aprobación
+        </div>
+        <div id="pendingList"><div class="empty-state">No hay usuarios pendientes</div></div>
+      </div>
+
+      <!-- Asignar insignia -->
+      <div class="admin-section">
+        <div class="admin-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+          Asignar insignia a estudiante
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Estudiante</label>
+            <select class="form-select" id="selStudent"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Insignia</label>
+            <select class="form-select" id="selBadge">
+              <option value="rocket|🚀|Primer despegue|50">🚀 Primer despegue (50 pts)</option>
+              <option value="bulb|💡|Idea brillante|40">💡 Idea brillante (40 pts)</option>
+              <option value="handshake|🤝|Networker|40">🤝 Networker (40 pts)</option>
+              <option value="chart|📊|Analista|35">📊 Analista (35 pts)</option>
+              <option value="mic|🎤|Speaker|60">🎤 Speaker (60 pts)</option>
+              <option value="globe|🌍|Impacto social|50">🌍 Impacto social (50 pts)</option>
+              <option value="money|💰|Inversor|45">💰 Inversor (45 pts)</option>
+              <option value="trophy|🏆|Emprendedor CFU|100">🏆 Emprendedor CFU (100 pts)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="assignBadge()">Asignar insignia</button>
+      </div>
+
+      <!-- Crear evento -->
+      <div class="admin-section">
+        <div class="admin-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+          Crear nuevo evento
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nombre del evento</label>
+            <input class="form-input" id="evtName" placeholder="Ej: Pitch Day 2026"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha (dd/mm/yyyy)</label>
+            <input class="form-input" id="evtDate" placeholder="20/05/2026"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lugar</label>
+            <input class="form-input" id="evtPlace" placeholder="Auditorio principal"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Puntos que otorga</label>
+            <input class="form-input" id="evtPts" type="number" placeholder="50" min="0"/>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="createEvent()">Crear evento</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection,
+    getDocs, addDoc, arrayUnion, serverTimestamp, query, orderBy }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ── CONFIGURACIÓN FIREBASE ──────────────────────────────────────────────────
+  // REEMPLAZA ESTOS VALORES con los de tu proyecto Firebase:
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDuzN286sDC_M8WhHWL-zLuNqQrd0m3kXM",
+    authDomain:        "club-emprendimiento-cfu.firebaseapp.com",
+    projectId:         "club-emprendimiento-cfu",
+    storageBucket:     "club-emprendimiento-cfu.firebasestorage.app",
+    messagingSenderId: "536396197387",
+    appId:             "1:536396197387:web:722b392d3de0513de8210e",
+    measurementId:     "G-KQ0W6WE49F"
+  };
+  // ────────────────────────────────────────────────────────────────────────────
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  const ADMIN_EMAILS = ["clubemprendimientocfu@gmail.com"]; // ← pon tu email de admin aquí
+
+  let currentUser = null;
+  let currentProfile = null;
+
+  // ── HELPERS ─────────────────────────────────────────────────────────────────
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+  function hideLoading() {
+    const s = document.getElementById('loadingScreen');
+    s.classList.add('hide');
+    setTimeout(() => s.style.display = 'none', 500);
+  }
+  function initials(name) {
+    return (name || '?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  }
+  function colorFor(str) {
+    const colors = [
+      ['#e8f0fe','#1a3c6e'],['#fef3d0','#7a5c00'],['#e1f5ee','#085041'],
+      ['#fbeaf0','#72243E'],['#eeedfe','#3C3489']
+    ];
+    let h = 0; for(const c of (str||'')) h = c.charCodeAt(0) + ((h<<5)-h);
+    return colors[Math.abs(h)%colors.length];
+  }
+  window.switchTab = function(name, el) {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-'+name).classList.add('active');
+    if(name==='ranking') loadRanking();
+    if(name==='admin')   { loadPending(); loadStudentSelect(); }
+    if(name==='eventos') loadEvents();
+  };
+
+  // ── AUTH ─────────────────────────────────────────────────────────────────────
+  window.signInWithGoogle = async function() {
+    try { await signInWithPopup(auth, provider); }
+    catch(e) { toast('Error al iniciar sesión'); }
+  };
+  window.signOut = async function() {
+    await signOut(auth); location.reload();
+  };
+
+  // ── AUTH STATE ───────────────────────────────────────────────────────────────
+  onAuthStateChanged(auth, async user => {
+    hideLoading();
+    if (!user) {
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('app').style.display = 'none';
+      return;
+    }
+    currentUser = user;
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+
+    // Nav
+    document.getElementById('navName').textContent = user.displayName?.split(' ')[0] || '';
+    const av = document.getElementById('navAvatar');
+    if (user.photoURL) {
+      av.outerHTML = `<img id="navAvatar" class="nav-avatar" src="${user.photoURL}" alt="avatar"/>`;
+    } else {
+      av.textContent = initials(user.displayName);
+    }
+
+    // Upsert user doc
+    const userRef = doc(db, 'users', user.uid);
+    const snap = await getDoc(userRef);
+    const isAdmin = ADMIN_EMAILS.includes(user.email);
+
+    if (!snap.exists()) {
+      await setDoc(userRef, {
+        name:    user.displayName || 'Sin nombre',
+        email:   user.email,
+        photo:   user.photoURL || '',
+        role:    isAdmin ? 'admin' : 'pending',
+        badges:  [],
+        points:  0,
+        createdAt: serverTimestamp()
+      });
+      currentProfile = { role: isAdmin ? 'admin' : 'pending', badges: [], points: 0 };
+    } else {
+      currentProfile = snap.data();
+      if (isAdmin && currentProfile.role !== 'admin') {
+        await updateDoc(userRef, { role: 'admin' });
+        currentProfile.role = 'admin';
+      }
+    }
+
+    // Show/hide elements based on role
+    if (currentProfile.role === 'pending') {
+      document.getElementById('pendingBanner').style.display = 'block';
+    }
+    if (currentProfile.role === 'admin') {
+      document.getElementById('adminTab').style.display = 'flex';
+    }
+
+    loadProfile();
+    loadEvents();
+  });
+
+  // ── PROFILE ──────────────────────────────────────────────────────────────────
+  async function loadProfile() {
+    const snap = await getDoc(doc(db, 'users', currentUser.uid));
+    const data = snap.data();
+    currentProfile = data;
+
+    const earned = data.badges || [];
+    const pts = data.points || 0;
+    const eventsCount = data.eventsAttended || 0;
+
+    // Stats
+    const ranks = ['Aspirante','Innovador','Emprendedor','Líder CFU'];
+    const rank = pts < 100 ? ranks[0] : pts < 250 ? ranks[1] : pts < 500 ? ranks[2] : ranks[3];
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card"><div class="stat-label">Insignias</div><div class="stat-value">${earned.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Puntos</div><div class="stat-value">${pts}</div></div>
+      <div class="stat-card"><div class="stat-label">Eventos</div><div class="stat-value">${eventsCount}</div></div>
+      <div class="stat-card"><div class="stat-label">Rango</div><div class="stat-value" style="font-size:17px">${rank}</div></div>
+    `;
+
+    const allBadges = [
+      { id:'rocket',    emoji:'🚀', name:'Primer despegue', desc:'Primer evento asistido' },
+      { id:'bulb',      emoji:'💡', name:'Idea brillante',  desc:'Participó en pitch de ideas' },
+      { id:'handshake', emoji:'🤝', name:'Networker',       desc:'3 eventos de networking' },
+      { id:'chart',     emoji:'📊', name:'Analista',        desc:'Taller de modelo de negocio' },
+      { id:'mic',       emoji:'🎤', name:'Speaker',         desc:'Presentó en un evento' },
+      { id:'globe',     emoji:'🌍', name:'Impacto social',  desc:'Evento de impacto social' },
+      { id:'money',     emoji:'💰', name:'Inversor',        desc:'Taller de finanzas' },
+      { id:'trophy',    emoji:'🏆', name:'Emprendedor CFU', desc:'Completó 10 eventos' },
+    ];
+
+    const earnedSet = new Set(earned.map(b => b.id || b));
+    const e = allBadges.filter(b => earnedSet.has(b.id));
+    const l = allBadges.filter(b => !earnedSet.has(b.id));
+
+    const renderBadge = (b, isEarned) => `
+      <div class="badge-card ${isEarned ? 'earned' : 'locked'}">
+        <div class="badge-emoji">${b.emoji}</div>
+        <div class="badge-name">${b.name}</div>
+        <div class="badge-desc">${b.desc}</div>
+        <span class="badge-pill ${isEarned ? 'pill-earned' : 'pill-locked'}">${isEarned ? 'Obtenida ✓' : 'Bloqueada'}</span>
+      </div>`;
+
+    document.getElementById('earnedBadges').innerHTML = e.length
+      ? e.map(b=>renderBadge(b,true)).join('')
+      : '<div class="empty-state">Aún no tienes insignias. ¡Asiste a eventos!</div>';
+    document.getElementById('lockedBadges').innerHTML = l.map(b=>renderBadge(b,false)).join('');
+  }
+
+  // ── EVENTS ───────────────────────────────────────────────────────────────────
+  async function loadEvents() {
+    const snap = await getDocs(query(collection(db,'events'), orderBy('createdAt','desc')));
+    const el = document.getElementById('eventsList');
+    if (snap.empty) { el.innerHTML='<div class="empty-state">No hay eventos publicados aún.</div>'; return; }
+    const months = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+    el.innerHTML = snap.docs.map(d => {
+      const ev = d.data();
+      const parts = (ev.date||'').split('/');
+      const day = parts[0]||'?', month = parts[1] ? months[parseInt(parts[1])-1] : '?';
+      return `
+        <div class="event-card">
+          <div class="event-date"><div class="event-day">${day}</div><div class="event-month">${month}</div></div>
+          <div class="event-info">
+            <div class="event-title">${ev.name||'Evento'}</div>
+            <div class="event-meta">📍 ${ev.place||'Por definir'}</div>
+          </div>
+          <span class="event-pts">+${ev.points||0} pts</span>
+        </div>`;
+    }).join('');
+  }
+
+  window.createEvent = async function() {
+    const name  = document.getElementById('evtName').value.trim();
+    const date  = document.getElementById('evtDate').value.trim();
+    const place = document.getElementById('evtPlace').value.trim();
+    const pts   = parseInt(document.getElementById('evtPts').value)||0;
+    if (!name||!date) { toast('Completa nombre y fecha'); return; }
+    await addDoc(collection(db,'events'), { name, date, place, points: pts, createdAt: serverTimestamp() });
+    ['evtName','evtDate','evtPlace','evtPts'].forEach(id=>document.getElementById(id).value='');
+    toast('Evento creado ✓');
+    loadEvents();
+  };
+
+  // ── RANKING ──────────────────────────────────────────────────────────────────
+  async function loadRanking() {
+    const snap = await getDocs(collection(db,'users'));
+    const users = snap.docs
+      .map(d=>({uid:d.id,...d.data()}))
+      .filter(u=>u.role==='member'||u.role==='admin')
+      .sort((a,b)=>(b.points||0)-(a.points||0));
+
+    const rl = document.getElementById('rankList');
+    if (!users.length) { rl.innerHTML='<div class="empty-state">No hay miembros aprobados aún.</div>'; return; }
+    rl.innerHTML = users.map((u,i) => {
+      const [bg,tc] = colorFor(u.name);
+      const isMe = u.uid === currentUser.uid;
+      return `
+        <div class="rank-row ${isMe?'me':''}">
+          <div class="rank-pos ${i<3?'top':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+          <div class="rank-av" style="background:${bg};color:${tc}">${initials(u.name)}</div>
+          <div class="rank-name">${u.name} ${isMe?'<span class="rank-you">(tú)</span>':''}</div>
+          <div class="rank-bdg">🏅 ${(u.badges||[]).length}</div>
+          <div class="rank-pts">${u.points||0} pts</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── ADMIN ────────────────────────────────────────────────────────────────────
+  async function loadPending() {
+    const snap = await getDocs(collection(db,'users'));
+    const pending = snap.docs.filter(d=>d.data().role==='pending');
+    const pl = document.getElementById('pendingList');
+    if (!pending.length) { pl.innerHTML='<div class="empty-state">No hay usuarios pendientes</div>'; return; }
+    pl.innerHTML = pending.map(d => {
+      const u = d.data(); const [bg,tc]=colorFor(u.name);
+      return `
+        <div class="user-row">
+          <div class="user-av-txt" style="background:${bg};color:${tc}">${initials(u.name)}</div>
+          <div class="user-info">
+            <div class="user-name">${u.name}</div>
+            <div class="user-email">${u.email}</div>
+          </div>
+          <div class="user-actions">
+            <button class="btn-primary btn-sm btn-success" onclick="approveUser('${d.id}')">Aprobar</button>
+            <button class="btn-primary btn-sm btn-danger"  onclick="rejectUser('${d.id}')">Rechazar</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  window.approveUser = async function(uid) {
+    await updateDoc(doc(db,'users',uid), { role:'member' });
+    toast('Usuario aprobado ✓'); loadPending(); loadStudentSelect();
+  };
+  window.rejectUser = async function(uid) {
+    await updateDoc(doc(db,'users',uid), { role:'rejected' });
+    toast('Usuario rechazado'); loadPending();
+  };
+
+  async function loadStudentSelect() {
+    const snap = await getDocs(collection(db,'users'));
+    const members = snap.docs.filter(d=>['member','admin'].includes(d.data().role));
+    const sel = document.getElementById('selStudent');
+    sel.innerHTML = members.map(d=>`<option value="${d.id}">${d.data().name}</option>`).join('');
+  }
+
+  window.assignBadge = async function() {
+    const uid   = document.getElementById('selStudent').value;
+    const raw   = document.getElementById('selBadge').value;
+    if (!uid||!raw) { toast('Selecciona estudiante e insignia'); return; }
+    const [id,emoji,name,pts] = raw.split('|');
+    const userRef = doc(db,'users',uid);
+    const snap = await getDoc(userRef);
+    const data = snap.data();
+    const already = (data.badges||[]).some(b=>(b.id||b)===id);
+    if (already) { toast('Este estudiante ya tiene esa insignia'); return; }
+    await updateDoc(userRef, {
+      badges: arrayUnion({ id, emoji, name }),
+      points: (data.points||0) + parseInt(pts)
+    });
+    toast(`Insignia ${emoji} asignada ✓`);
+  };
+</script>
+</body>
+</html>
