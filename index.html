@@ -605,7 +605,50 @@
     const sel = document.getElementById('selStudent');
     sel.innerHTML = members.map(d=>`<option value="${d.id}">${d.data().name}</option>`).join('');
   }
+window.createEvent = async function() {
 
+  try {
+
+    const name  = document.getElementById('evtName').value.trim();
+    const date  = document.getElementById('evtDate').value.trim();
+    const place = document.getElementById('evtPlace').value.trim();
+    const pts   = parseInt(document.getElementById('evtPts').value) || 0;
+
+    if (!name || !date) {
+      toast('Completa nombre y fecha');
+      return;
+    }
+
+    console.log('Creando evento...');
+
+    await addDoc(collection(db,'events'), {
+      name: name,
+      date: date,
+      place: place,
+      points: pts,
+      createdAt: serverTimestamp()
+    });
+
+    document.getElementById('evtName').value = '';
+    document.getElementById('evtDate').value = '';
+    document.getElementById('evtPlace').value = '';
+    document.getElementById('evtPts').value = '';
+
+    toast('Evento creado correctamente ✓');
+
+    await loadEvents();
+
+  } catch(error) {
+
+    console.error('ERROR FIREBASE:', error);
+
+    alert('Error al crear evento: ' + error.message);
+
+    toast('Error al crear evento');
+
+  }
+
+};
   window.assignBadge = async function() {
     const uid   = document.getElementById('selStudent').value;
     const raw   = document.getElementById('selBadge').value;
