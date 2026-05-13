@@ -531,45 +531,6 @@
     }).join('');
   }
 
-window.createEvent = async function () {
-
-  try {
-
-    const name = document.getElementById("evtName").value.trim();
-    const date = document.getElementById("evtDate").value;
-    const place = document.getElementById("evtPlace").value.trim();
-    const pts = Number(document.getElementById("evtPts").value);
-
-    if (!name || !date || !place || !pts) {
-      alert("Completa todos los campos");
-      return;
-    }
-
-    await addDoc(collection(db, "events"), {
-      name,
-      date,
-      place,
-      points: pts,
-      createdAt: serverTimestamp()
-    });
-
-    alert("Evento creado correctamente");
-
-    document.getElementById("evtName").value = "";
-    document.getElementById("evtDate").value = "";
-    document.getElementById("evtPlace").value = "";
-    document.getElementById("evtPts").value = "";
-
-    loadEvents();
-
-  } catch (error) {
-
-    console.error(error);
-    alert("ERROR: " + error.message);
-
-  }
-
-};
   // ── RANKING ──────────────────────────────────────────────────────────────────
   async function loadRanking() {
     const snap = await getDocs(collection(db,'users'));
@@ -695,3 +656,6 @@ window.createEvent = async function() {
 </script>
 </body>
 </html>
+
+
+   
